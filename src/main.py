@@ -18,12 +18,10 @@ class HIDDB:
             "password": self.password,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
         resp = requests.post(f"{base}user/register", headers=header, json=data)
-        return resp
+        return resp.text
 
     def userUpdateVerify(self, userId, otpId):
         self.userId = userId
@@ -34,13 +32,10 @@ class HIDDB:
             "otp_id": self.otpId,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
-        resp = requests.post(f"{base}user/update/verify",
-                             headers=header, json=data)
-        return resp
+        resp = requests.post(f"{base}user/update/verify", headers=header, json=data)
+        return resp.text
 
     def userResetPassword(self, email):
         self.email = email
@@ -49,32 +44,22 @@ class HIDDB:
             "email": self.email,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
-        resp = requests.post(f"{base}user/reset",
-                             headers=header, json=data)
-        return resp
+        resp = requests.post(f"{base}user/reset", headers=header, json=data)
+        return resp.text
 
     def userUpdateResetPassword(self, userId, otpId, password):
         self.userId = userId
         self.otpId = otpId
         self.password = password
 
-        data = {
-            "user_id": self.userId,
-            "otp_id": self.otpId,
-            "password": password
-        }
+        data = {"user_id": self.userId, "otp_id": self.otpId, "password": password}
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
-        resp = requests.post(f"{base}user/update/reset",
-                             headers=header, json=data)
-        return resp
+        resp = requests.post(f"{base}user/update/reset", headers=header, json=data)
+        return resp.text
 
     def userLogin(self, email, password):
         self.email = email
@@ -85,19 +70,23 @@ class HIDDB:
             "password": self.password,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
         resp = requests.post(f"{base}user/login", headers=header, json=data)
-        self.state.access_token = resp.text
-        print(resp.text)
-        return
+        self.state.accessToken = resp.text
+
+        return resp.text
 
     def userRefresh(self):
-        resp = requests.post(f"{base}user/refresh")
-        self.state.access_token = resp.text
-        return
+
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.state.accessToken}",
+        }
+
+        resp = requests.post(f"{base}user/refresh", headers=header)
+        self.state.accessToken = resp.text
+        return resp.text
 
     def machineLogin(self, key, secret):
         self.key = key
@@ -108,66 +97,76 @@ class HIDDB:
             "secret": self.secret,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        header = {"Content-Type": "application/json"}
 
         resp = requests.post(f"{base}machine/login", headers=header, json=data)
-        self.state.access_token = resp.text
-        return
+        return resp.text
 
-    # TODO : take 2 values in permission parameter
-    def createMachineAccount(self, organizationId, permission):
-        self.organizationId = organizationId
+    def createMachineAccount(self, permission):
+        encoded_jwt = self.state.accessToken
+        data = jwt.decode(
+            encoded_jwt, options={"verify_signature": False}, algorithms=["RS256"]
+        )
+        self.organizationId = str(data["organization"])
         self.permission = permission
 
         data = {
             "permission": self.permission,
         }
+        l1 = ["read", "write"]
+        if data["permission"] in l1:
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.state.accessToken}",
+            }
+            resp = requests.post(
+                f"{base}organization/{self.organizationId}/machine",
+                headers=header,
+                json=data,
+            )
 
-        header = {
-            "Content-Type": "application/json"
-        }
-
-        resp = requests.post(
-            f"{base}organization/{self.organizationId}/machine", headers=header, json=data)
-        return resp
+            return resp.text
+        else:
+            return "request.body.permission should be equal to one of the allowed values:read,write"
 
     def deleteMachineAccount(self, organizationId):
         self.organizationId = organizationId
 
         resp = requests.delete(f"{base}organization/{organizationId}/machine")
-        return resp
+        return resp.text
 
     def createDatabase(self, name):
         self.name = name
-
         data = {
             "database_name": self.name,
         }
         header = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.state.accessToken}",
         }
         resp = requests.post(f"{base}database", headers=header, json=data)
-
-        # dispatchEvent
-        return resp
+        return resp.text
 
     def listDatabases(self):
-        resp = requests.get(f"{base}database")
-        return resp
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"{base}database", headers=header)
+
+        return resp.text
 
     def getDatabase(self, id):
         self.id = id
-        resp = requests.get(f"{base}database{self.id}")
-        return resp
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"{base}database/{self.id}", headers=header)
+
+        return resp.text
 
     def deleteDatabase(self, id):
         self.id = id
-        resp = requests.delete(f"{base}database{self.id}")
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.delete(f"{base}database/{self.id}", headers=header)
 
         # dispatchEvent
-        return resp
+        return resp.text
 
     def createInstance(self, id, volume_size, type):
         self.id = id
@@ -177,111 +176,165 @@ class HIDDB:
         data = {
             "database_id": self.id,
             "volume_size": self.volume_size,
-            "type": self.type
+            "type": self.type,
         }
 
-        header = {
-            "Content-Type": "application/json"
-        }
+        l1 = ["free", "s", "m", "l"]
+        if data["type"] in l1:
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.state.accessToken}",
+            }
 
-        # dispatchEvent
-        resp = requests.post(f"{base}instance", headers=header, json=data)
-        return resp
+            # dispatchEvent
+            resp = requests.post(f"{base}instance", headers=header, json=data)
+
+            return resp.text
+        else:
+            return "request.body.type should be equal to one of the allowed values: free, s, m, l"
 
     def listInstances(self):
-        resp = requests.get(f"{base}instance")
-        return resp
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"{base}instance", headers=header)
+
+        return resp.text
 
     def getInstance(self, id):
         self.id = id
-        resp = requests.get(f"{base}instance{self.id}")
-        return resp
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"{base}instance/{self.id}", headers=header)
+
+        return resp.text
 
     def deleteInstance(self, id):
         self.id = id
-        resp = requests.delete(f"{base}instance{self.id}")
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.delete(f"{base}instance/{self.id}", headers=header)
 
         # dispatchEvent
-        return resp
+        return resp.text
 
-    #TODO : Still working on this
+    def createCollection(self, databaseId, name):
+        self.name = name
 
-    # def createCollection(self, databaseId, name):
-    #     self.databaseId = databaseId
-    #     self.name = name
+        data = {
+            "collection_id": self.name,
+        }
 
-    #     data = {
-    #         "collection_id": self.name,
-    #     }
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.state.accessToken}",
+        }
 
-    #     header = {
-    #         "Content-Type": "application/json"
-    #     }
+        # dispatchEvent
+        resp = requests.post(
+            f"https://{databaseId}.hiddb.io/collection", headers=header, json=data
+        )
+        return resp.text
 
-    #     # dispatchEvent
-    #     resp = requests.post(f"https://{self.databaseId}.hiddb.io/collection", headers=header, json=data)
-    #     return resp
+    def listCollections(self, databaseId):
+        path = f"/collection"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
 
-    # def listCollections(self, databaseId):
-    #     self.databaseId = databaseId
-    #     path = f'/collection'
-    #     resp = requests.get(f"https://{self.databaseId}.hiddb.io{path}")
-    #     return resp
+    def getCollection(self, databaseId, name):
+        self.name = name
+        path = f"/collection/{self.name}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
 
-    # def getCollection(self, databaseId, name):
-    #     self.databaseId = databaseId
-    #     self.name = name
-    #     path = f'/collection/{self.name}'
-    #     resp = requests.get(f"https://{self.databaseId}.hiddb.io{path}")
-    #     return resp
+    def deleteCollection(self, databaseId, name):
+        self.name = name
+        path = f"/collection/{self.name}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.delete(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        # dispatchEvent
+        return resp.text
 
-    # def deleteCollection(self, databaseId, name):
-    #     self.databaseId = databaseId
-    #     self.name = name
-    #     path = f'/collection/{self.name}'
-    #     resp = requests.delete(f"https://{self.databaseId}.hiddb.io{path}")
-    #     # dispatchEvent
-    #     return resp
+    def createIndex(self, databaseId, field_name, dimension, collection_id):
+        self.field_id = field_name
+        self.dimension = dimension
+        path = f"/collection/{collection_id}/index"
 
-    # def createIndex(self, databaseId, field_name, dimension):
-    #     self.field_id = field_name
-    #     self.dimension = dimension
-    #     path = "/collection/{collection_id}/index"
+        data = {"field_id": self.field_id, "dimension": self.dimension}
 
-    #     data = {
-    #         "field_id": self.field_id,
-    #         "dimension": self.dimension
-    #     }
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.state.accessToken}",
+        }
 
-    #     header = {
-    #         "Content-Type": "application/json"
-    #     }
+        # dispatchEvent
+        resp = requests.post(
+            f"https://{databaseId}.hiddb.io{path}", headers=header, json=data
+        )
+        return resp.text
 
-    #     # dispatchEvent
-    #     resp = requests.post(
-    #         f"https://${self.databaseId}.hiddb.io${path}", headers=header, json=data)
-    #     return resp
+    def listIndices(self, databaseId, collection_id):
+        path = f"/collection/{collection_id}/index"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
 
-    # def listIndices(self, databaseId):
-    #     self.databaseId = databaseId
-    #     path = "/collection/{collection_id}/index"
-    #     resp = requests.get(f"https://{self.databaseId}.hiddb.io{path}")
-    #     return resp
+    def getIndex(self, databaseId, name, collection_id):
+        self.databaseId = databaseId
+        self.name = name
+        path = f"/collection/{collection_id}/index/{name}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
 
-    # def getIndex(self, databaseId, name):
-    #     self.databaseId = databaseId
-    #     self.name = name
-    #     path = f'/collection/{collection_id}/index/{name}'
-    #     resp = requests.get(f"https://{self.databaseId}.hiddb.io{path}")
-    #     return resp
+    def deleteIndex(self, databaseId, name, collection_id):
+        self.databaseId = databaseId
+        self.name = name
+        path = f"/collection/{collection_id}/index/{name}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.delete(
+            f"https://{databaseId}.hiddb.io{path}/index", headers=header
+        )
+        # dispatchEvent
+        return resp.text
 
-    # def deleteIndex(self, databaseId, name):
-    #     self.databaseId = databaseId
-    #     self.name = name
-    #     path = f'/collection/{collection_id}/index/${name}'
-    #     resp = requests.delete(f"https://${self.databaseId}.hiddb.io${path}/index")
-    #     # dispatchEvent
-    #     return resp
+    def insertDocument(self, databaseId, document, collection_id):
+
+        path = f"/collection/{collection_id}/document"
+
+        data = {"documents": [document]}
+
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.state.accessToken}",
+        }
+
+        # dispatchEvent
+        resp = requests.post(
+            f"https://{databaseId}.hiddb.io{path}", headers=header, json=data
+        )
+        return resp.text
+
+    def searchNearestDocuments(self, databaseId, collection_id):
+        path = f"/collection/{collection_id}/document/search"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
+
+    def getDocument(self, databaseId, name, collection_id):
+
+        path = f"/collection/{collection_id}/document/{id}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.get(f"https://{databaseId}.hiddb.io{path}", headers=header)
+        return resp.text
+
+    def deleteDocument(self, databaseId, name, collection_id):
+
+        path = f"/collection/{collection_id}/index/${name}"
+        header = {"Authorization": f"Bearer {self.state.accessToken}"}
+        resp = requests.delete(
+            f"https://${databaseId}.hiddb.io${path}/index", headers=header
+        )
+        # dispatchEvent
+        return resp.text
 
 
 class State:
@@ -301,15 +354,8 @@ class State:
             self.accessToken = access_token
             return
 
-        # self._decoded = jwt.decode(access_token, algorithms=["RS256"])
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     hiddb = HIDDB()
     state = State(hiddb)
     state.access_token = ""
-
-# obj = HIDDB()
-# # obj.userRegister("demo5@gmail.com","demo1234")
-# obj.userLogin("demo5@gmail.com","demo1234")
-# # obj.createDatabase("database")
