@@ -1,5 +1,4 @@
 import requests
-import jwt
 
 class HIDDB:
     def __init__(self):
@@ -23,8 +22,6 @@ class State:
             self.accessToken = access_token
             return
         
-        # self._decoded = jwt.decode(access_token, algorithms=["RS256"])
-
 
 if __name__ == '__main__':
     hiddb = HIDDB()

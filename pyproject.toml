@@ -7,7 +7,7 @@ authors = ["Benjamin Bolbrinker <benjamin.bolbrinker@hiddb.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 requests = "^2.27.1"
-PyJWT = "^2.3.0"
+Authlib = "^0.15.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
