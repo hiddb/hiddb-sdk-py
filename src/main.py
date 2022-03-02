@@ -94,6 +94,59 @@ class HIDDB(object):
             async with req(path) as resp:
                 return await resp.json()
 
+    async def create_instance(self, database_id: str, type: str, volume_size: str):
+        url = baseUrl
+        path = f"/instance"
+        method = "post"
+
+        body = {
+            "database_id": database_id,
+            "type": type,
+            "volume_size": volume_size,
+        }
+
+        async with aiohttp.ClientSession(url) as session:
+            req = getattr(session, method)
+            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+            async with req(path, json=body, headers=postHeaders) as resp:
+                return await resp.json()
+
+    async def get_instances(self):
+        url = baseUrl
+        path = f"/instance"
+        method = "get"
+
+        async with aiohttp.ClientSession(url) as session:
+            req = getattr(session, method)
+            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+            async with req(path) as resp:
+                return await resp.text()
+
+
+    async def get_instance(self, id: str):
+        url = baseUrl
+        path = f"/instance/{id}"
+        method = "get"
+
+        async with aiohttp.ClientSession(url) as session:
+            req = getattr(session, method)
+            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+            async with req(path) as resp:
+                return await resp.json()
+
+
+    async def delete_instance(self, id: str):
+        url = baseUrl
+        path = f"/instance/{id}"
+        method = "delete"
+
+        async with aiohttp.ClientSession(url) as session:
+            req = getattr(session, method)
+            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+            async with req(path) as resp:
+                return await resp.json()
+
+
 class State:
     def __init__(self, hiddb: HIDDB, key: str, secret: str):
         self.hiddb = hiddb
@@ -130,6 +183,7 @@ async def main():
     # print(await hiddb.get_databases())
     # print(await hiddb.get_database("u92cccov5tsg14tq2l"))
     # print(await hiddb.delete_database("u92cccov5tsg14tq2l"))
+    # print(await hiddb.get_instances())
 
 
 if __name__ == '__main__':
