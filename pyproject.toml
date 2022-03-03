@@ -1,14 +1,21 @@
 [tool.poetry]
-name = "hiddb-sdk-py"
+name = "hiddb"
 version = "0.1.0"
-description = ""
+description = "Python SDK for HIDDB"
+keywords = ["HIDDB", "hiddb", "vector database", "similarity search"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://hiddb.com"
+repository = "https://github.com/hiddb/hiddb-sdk-py.git"
+include = [
+    "LICENSE",
+]
+
 authors = ["Benjamin Bolbrinker <benjamin.bolbrinker@hiddb.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-requests = "^2.27.1"
 PyJWT = "^2.3.0"
-openapi-python-client = "^0.11.1"
 asyncio = "^3.4.3"
 aiohttp = "^3.8.1"
 

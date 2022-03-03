@@ -1,7 +1,4 @@
-from curses import doupdate
-import requests
 import jwt
-from threading import Timer
 import time
 
 import asyncio
@@ -55,7 +52,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.json()
+                return await resp.text()
 
 
     async def list_databases(self):
@@ -297,7 +294,7 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def get_document(self, database_id: str, collection: str, id: str):
+    async def delete_document(self, database_id: str, collection: str, id: str):
         url = f"https://{database_id}.hiddb.io"
         path = f"/collection/{collection}/document/{id}"
         method = "delete"
@@ -334,19 +331,3 @@ class State:
             self._refresh.cancel()
 
         self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60, self.hiddb._machine_login, (self._key, self._secret)))
-
-
-async def main():
-    key="ZGGqKw0bYKq2SUOKRxhh"
-    secret="dxk59OkHtq-LZ8CuG2qH"
-    hiddb = await HIDDB.create(key, secret)
-    # print(await hiddb.create_database("tesdb"))
-    # print(await hiddb.list_databases())
-    # print(await hiddb.get_database("u92cccov5tsg14tq2l"))
-    # print(await hiddb.delete_database("u92cccov5tsg14tq2l"))
-    # print(await hiddb.get_instances())
-
-
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
