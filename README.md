@@ -1,4 +1,4 @@
-# HIDDB-SDK-PY
+# HIDDB Python SDK
 
 The official SDK for the [HIDDB](https://hiddb.com) vector database.
 
