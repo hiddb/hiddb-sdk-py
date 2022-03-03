@@ -1,12 +1,12 @@
 import asyncio
-import asynchronous
+import hiddb.asynchronous
 
 def sync(async_func):
     return asyncio.get_event_loop().run_until_complete(async_func)
 
 class HIDDB:
     def __init__(self, key: str, secret: str):
-        self.hiddb = sync(asynchronous.HIDDB.create(key, secret))
+        self.hiddb = sync(hiddb.asynchronous.HIDDB.create(key, secret))
 
     def create_database(self, name: str):
         return sync(self.hiddb.create_database(name))

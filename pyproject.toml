@@ -2,15 +2,19 @@
 name = "hiddb"
 version = "0.1.0"
 description = "Python SDK for HIDDB"
-keywords = ["HIDDB", "hiddb", "vector database", "similarity search"]
+keywords = [
+    "HIDDB", 
+    "hiddb", 
+    "vector database", 
+    "similarity search"
+    ]
 readme = "README.md"
 license = "MIT"
 homepage = "https://hiddb.com"
 repository = "https://github.com/hiddb/hiddb-sdk-py.git"
 include = [
     "LICENSE",
-]
-
+    ]
 authors = ["Benjamin Bolbrinker <benjamin.bolbrinker@hiddb.com>"]
 
 [tool.poetry.dependencies]
