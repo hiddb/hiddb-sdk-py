@@ -143,13 +143,13 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def create_collection(self, database_id: str, name: str):
+    async def create_collection(self, database_id: str, collection_name: str):
         url = f"https://{database_id}.hiddb.io"
         path = f"/collection"
         method = "post"
 
         body = {
-            "collection_id": name,
+            "collection_name": collection_name,
         }
 
         async with aiohttp.ClientSession(url) as session:
@@ -171,9 +171,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def get_collection(self, database_id: str, name: str):
+    async def get_collection(self, database_id: str, collection_name: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{name}"
+        path = f"/collection/{collection_name}"
         method = "get"
 
         async with aiohttp.ClientSession(url) as session:
@@ -183,9 +183,9 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def delete_collection(self, database_id: str, name: str):
+    async def delete_collection(self, database_id: str, collection_name: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{name}"
+        path = f"/collection/{collection_name}"
         method = "delete"
 
         async with aiohttp.ClientSession(url) as session:
@@ -195,13 +195,13 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def create_index(self, database_id: str, collection: str, field: str, dimension: int):
+    async def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/index"
+        path = f"/collection/{collection_name}/index"
         method = "post"
 
         body = {
-            "field_id": field,
+            "field_name": field_name,
             "dimension": dimension,
         }
 
@@ -212,9 +212,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def list_indices(self, database_id: str, collection: str):
+    async def list_indices(self, database_id: str, collection_name: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/index"
+        path = f"/collection/{collection_name}/index"
         method = "get"
 
         async with aiohttp.ClientSession(url) as session:
@@ -224,9 +224,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def get_index(self, database_id: str, collection: str, name: str):
+    async def get_index(self, database_id: str, collection_name: str, field_name: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/index/{name}"
+        path = f"/collection/{collection_name}/index/{field_name}"
         method = "get"
 
         async with aiohttp.ClientSession(url) as session:
@@ -236,9 +236,9 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def delete_index(self, database_id: str, collection: str, name: str):
+    async def delete_index(self, database_id: str, collection_name: str, field_name: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/index/{name}"
+        path = f"/collection/{collection_name}/index/{field_name}"
         method = "delete"
 
         async with aiohttp.ClientSession(url) as session:
@@ -248,9 +248,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def insert_document(self, database_id: str, collection: str, document: dict):
+    async def insert_document(self, database_id: str, collection_name: str, document: dict):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/document"
+        path = f"/collection/{collection_name}/document"
         method = "post"
 
         body = {
@@ -264,14 +264,14 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def search_nearest_documents(self, database_id: str, collection: str, field: str, vector, max_neighbors=10):
+    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vector, max_neighbors=10):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/document/search"
+        path = f"/collection/{collection_name}/document/search"
         method = "post"
 
         body = {
             "vector": vector,
-            "field": field,
+            "field": field_name,
             "max_neighbors": max_neighbors
         }
 
@@ -282,9 +282,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def get_document(self, database_id: str, collection: str, id: str):
+    async def get_document(self, database_id: str, collection_name: str, document_id: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/document/{id}"
+        path = f"/collection/{collection_name}/document/{document_id}"
         method = "get"
 
         async with aiohttp.ClientSession(url) as session:
@@ -294,9 +294,9 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def delete_document(self, database_id: str, collection: str, id: str):
+    async def delete_document(self, database_id: str, collection_name: str, document_id: str):
         url = f"https://{database_id}.hiddb.io"
-        path = f"/collection/{collection}/document/{id}"
+        path = f"/collection/{collection_name}/document/{document_id}"
         method = "delete"
 
         async with aiohttp.ClientSession(url) as session:
