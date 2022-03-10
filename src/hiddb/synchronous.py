@@ -2,7 +2,7 @@ import asyncio
 import hiddb.asynchronous
 
 def sync(async_func):
-    return asyncio.get_event_loop().run_until_complete(async_func)
+    return asyncio.run(async_func)
 
 class HIDDB:
     def __init__(self, key: str, secret: str):
@@ -44,23 +44,23 @@ class HIDDB:
     def delete_collection(self, database_id: str, collection_name: str):
         return sync(self.hiddb.delete_collectoin(database_id, collection_name))
 
-    def create_index(self, database_id: str, collection: str, field: str, dimension: int):
-        return sync(self.hiddb.create_index(database_id, collection, field, dimension))
+    def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
+        return sync(self.hiddb.create_index(database_id, collection_name, field_name, dimension))
 
-    def list_indices(self, database_id: str, collection: str):
-        return sync(self.hiddb.list_indices(database_id, collection))
+    def list_indices(self, database_id: str, collection_name: str):
+        return sync(self.hiddb.list_indices(database_id, collection_name))
 
-    def get_index(self, database_id: str, collection: str, index_name: str):
-        return sync(self.hiddb.get_index(database_id, collection, index_name))
+    def get_index(self, database_id: str, collection_name: str, index_name: str):
+        return sync(self.hiddb.get_index(database_id, collection_name, index_name))
     
-    def delete_index(self, database_id: str, collection: str, index_name: str):
-        return sync(self.hiddb.delete_index(database_id, collection, index_name))
+    def delete_index(self, database_id: str, collection_name: str, index_name: str):
+        return sync(self.hiddb.delete_index(database_id, collection_name, index_name))
 
-    def insert_document(self, database_id: str, collection: str, document: dict):
-        return sync(self.hiddb.insert_document(database_id, collection, document))
+    def insert_document(self, database_id: str, collection_name: str, document: dict):
+        return sync(self.hiddb.insert_document(database_id, collection_name, document))
 
-    def search_nearest_documents(self, database_id: str, collection: str, field: str, vector, max_neighbors=10):
-        return sync(self.hiddb.search_nearest_documents(database_id, collection, field, vector, max_neighbors))
+    def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vector, max_neighbors=10):
+        return sync(self.hiddb.search_nearest_documents(database_id, collection_name, field_name, vector, max_neighbors))
 
     def get_document(self, database_id: str, collection_name: str, document_id: str):
         return sync(self.hiddb.get_document(database_id, collection_name, document_id))

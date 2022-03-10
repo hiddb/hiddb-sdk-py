@@ -52,7 +52,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.text()
+                return await resp.json()
 
 
     async def list_databases(self):
@@ -64,7 +64,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
-                return await resp.text()
+                return await resp.json()
 
 
     async def get_database(self, id: str):
@@ -116,7 +116,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
-                return await resp.text()
+                return await resp.json()
 
 
     async def get_instance(self, id: str):
@@ -209,7 +209,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.json()
+                return await resp.text()
 
 
     async def list_indices(self, database_id: str, collection_name: str):
@@ -261,7 +261,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.json()
+                return await resp.text()
 
 
     async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vector, max_neighbors=10):
@@ -271,7 +271,7 @@ class HIDDB(object):
 
         body = {
             "vector": vector,
-            "field": field_name,
+            "field_name": field_name,
             "max_neighbors": max_neighbors
         }
 
@@ -279,7 +279,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.json()
+                return await resp.text()
 
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
