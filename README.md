@@ -35,7 +35,7 @@ hiddb.create_index(
 )
 ```
 
-Insert a dummy document:
+Insert documents like that:
 
 ```python
 document = {

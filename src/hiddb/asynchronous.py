@@ -35,6 +35,8 @@ class HIDDB(object):
         async with aiohttp.ClientSession(url) as session:
             req = getattr(session, method)
             async with req(path, json=body, headers=postHeaders) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 self.state.access_token = (await resp.json())['access_token']
                 return self.state.access_token
 
@@ -52,8 +54,9 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
-
 
     async def list_databases(self):
         url = baseUrl
@@ -64,6 +67,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -76,6 +81,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -88,6 +95,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
     async def create_instance(self, database_id: str, type: str, volume_size: str):
@@ -105,6 +114,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
     async def get_instances(self):
@@ -116,6 +127,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -128,6 +141,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -140,6 +155,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
     
 
@@ -156,6 +173,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -168,6 +187,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -180,6 +201,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
     
 
@@ -192,6 +215,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -209,7 +234,9 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.text()
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                return await resp.json()
 
 
     async def list_indices(self, database_id: str, collection_name: str):
@@ -221,6 +248,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
@@ -233,6 +262,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
     
 
@@ -245,41 +276,54 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 
-    async def insert_document(self, database_id: str, collection_name: str, document: dict):
+    async def insert_document(self, database_id: str, collection_name: str, documents: dict):
         url = f"https://{database_id}.hiddb.io"
         path = f"/collection/{collection_name}/document"
         method = "post"
 
         body = {
-            "documents": [document],
+            "documents": documents,
         }
 
         async with aiohttp.ClientSession(url) as session:
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.text()
 
 
-    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vector, max_neighbors=10):
+    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vectors=None, ids=None, max_neighbors=10):
         url = f"https://{database_id}.hiddb.io"
         path = f"/collection/{collection_name}/document/search"
         method = "post"
 
-        body = {
-            "vector": vector,
-            "field_name": field_name,
-            "max_neighbors": max_neighbors
-        }
-
+        if vectors:
+            body = {
+                "vectors": vectors,
+                "field_name": field_name,
+                "max_neighbors": max_neighbors
+            }
+        if ids:
+            body = {
+                "ids": ids,
+                "field_name": field_name,
+                "max_neighbors": max_neighbors
+            }
+        
         async with aiohttp.ClientSession(url) as session:
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                return await resp.text()
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                return await resp.json()
 
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
@@ -291,6 +335,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
     
 
@@ -303,6 +349,8 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
 class State:

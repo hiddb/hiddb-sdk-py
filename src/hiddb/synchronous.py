@@ -1,6 +1,7 @@
 import asyncio
 import hiddb.asynchronous
 
+
 def sync(async_func):
     return asyncio.run(async_func)
 
@@ -59,8 +60,8 @@ class HIDDB:
     def insert_document(self, database_id: str, collection_name: str, document: dict):
         return sync(self.hiddb.insert_document(database_id, collection_name, document))
 
-    def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vector, max_neighbors=10):
-        return sync(self.hiddb.search_nearest_documents(database_id, collection_name, field_name, vector, max_neighbors))
+    def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vectors=None, ids=None, max_neighbors=10):
+        return sync(self.hiddb.search_nearest_documents(database_id, collection_name, field_name, vectors, ids=ids, max_neighbors=max_neighbors))
 
     def get_document(self, database_id: str, collection_name: str, document_id: str):
         return sync(self.hiddb.get_document(database_id, collection_name, document_id))
