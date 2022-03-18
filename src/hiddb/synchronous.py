@@ -43,7 +43,7 @@ class HIDDB:
         return sync(self.hiddb.get_collection(database_id, collection_name))
 
     def delete_collection(self, database_id: str, collection_name: str):
-        return sync(self.hiddb.delete_collectoin(database_id, collection_name))
+        return sync(self.hiddb.delete_collection(database_id, collection_name))
 
     def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
         return sync(self.hiddb.create_index(database_id, collection_name, field_name, dimension))
@@ -57,8 +57,8 @@ class HIDDB:
     def delete_index(self, database_id: str, collection_name: str, index_name: str):
         return sync(self.hiddb.delete_index(database_id, collection_name, index_name))
 
-    def insert_document(self, database_id: str, collection_name: str, document: dict):
-        return sync(self.hiddb.insert_document(database_id, collection_name, document))
+    def insert_document(self, database_id: str, collection_name: str, documents: list):
+        return sync(self.hiddb.insert_document(database_id, collection_name, documents))
 
     def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vectors=None, ids=None, max_neighbors=10):
         return sync(self.hiddb.search_nearest_documents(database_id, collection_name, field_name, vectors, ids=ids, max_neighbors=max_neighbors))
