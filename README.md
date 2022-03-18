@@ -46,7 +46,7 @@ document = {
 hiddb.insert_document(
     database_id=database_id,
     collection_name='wordvectors',
-    document=document
+    documents=[document]
 )
 ```
 
@@ -57,7 +57,7 @@ similar_words = hiddb.search_nearest_documents(
     database_id="<your database_id>",
     collection_name='wordvectors',
     field_name="vector",
-    vector=[0.0]*300,
+    vectors=[[42.0]*300],
     max_neighbors=10
 )
 ```
