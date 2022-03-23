@@ -40,6 +40,19 @@ class HIDDB(object):
                 self.state.access_token = (await resp.json())['access_token']
                 return self.state.access_token
 
+    async def check_health(self):
+        url = baseUrl
+        path = f"/health"
+        method = "get"
+
+        async with aiohttp.ClientSession(url) as session:
+            req = getattr(session, method)
+            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+            async with req(path) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                await resp.text()
+                return 'OK'
 
     async def create_database(self, name: str):
         url = baseUrl

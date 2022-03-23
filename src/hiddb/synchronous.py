@@ -9,6 +9,9 @@ class HIDDB:
     def __init__(self, key: str, secret: str):
         self.hiddb = sync(hiddb.asynchronous.HIDDB.create(key, secret))
 
+    def check_health(self):
+        return sync(self.hiddb.check_health())
+
     def create_database(self, database_name: str):
         return sync(self.hiddb.create_database(database_name))
 
