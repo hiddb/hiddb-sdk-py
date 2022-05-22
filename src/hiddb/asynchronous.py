@@ -8,7 +8,7 @@ async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-domain = 'hiddb.dev'
+domain = 'hiddb.io'
 baseDbUrl = f'https://api.{domain}'
 postHeaders = { 'Content-Type' : 'application/json' }
 
