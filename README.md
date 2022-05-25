@@ -62,7 +62,7 @@ similar_words = hiddb.search_nearest_documents(
 )
 ```
 
-More examples are coming 🚀
+More examples and a more detailed documentation will follow soon 🚀
 
 ## Contributing
 
