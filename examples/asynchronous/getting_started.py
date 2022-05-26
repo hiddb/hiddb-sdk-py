@@ -1,4 +1,3 @@
-from pyparsing import col
 from hiddb.asynchronous import HIDDB
 import asyncio
 

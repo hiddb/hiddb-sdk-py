@@ -8,8 +8,11 @@ async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-domain = 'hiddb.io'
-baseDbUrl = f'https://api.{domain}'
+secure = False
+domain = 'localhost'
+
+protocol = 'https' if secure else 'http'
+baseDbUrl = f'{protocol}://api.{domain}'
 postHeaders = { 'Content-Type' : 'application/json' }
 
 
@@ -41,20 +44,6 @@ class HIDDB(object):
                 self.state.access_token = (await resp.json())['access_token']
                 return self.state.access_token
 
-    async def check_health(self):
-        url = baseDbUrl
-        path = f"/health"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                await resp.text()
-                return 'OK'
-
     async def create_database(self, name: str):
         url = baseDbUrl
         path = f"/database"
@@ -68,7 +57,7 @@ class HIDDB(object):
             req = getattr(session, method)
             session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
             async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 202:
+                if resp.status != 202 and resp.status != 200:
                     raise Exception(f"Status code {resp.status}: {await resp.text()}")
                 return await resp.json()
 
@@ -175,7 +164,7 @@ class HIDDB(object):
     
 
     async def create_collection(self, database_id: str, collection_name: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection"
         method = "post"
 
@@ -193,7 +182,7 @@ class HIDDB(object):
 
 
     async def list_collections(self, database_id: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection"
         method = "get"
 
@@ -207,7 +196,7 @@ class HIDDB(object):
 
 
     async def get_collection(self, database_id: str, collection_name: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}"
         method = "get"
 
@@ -221,7 +210,7 @@ class HIDDB(object):
     
 
     async def delete_collection(self, database_id: str, collection_name: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}"
         method = "delete"
 
@@ -234,13 +223,13 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
-        url = f"https://{database_id}.{domain}"
+    async def create_index(self, database_id: str, collection_name: str, index_name: str, dimension: int):
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/index"
         method = "post"
 
         body = {
-            "field_name": field_name,
+            "field_name": index_name,
             "dimension": dimension,
         }
 
@@ -254,7 +243,7 @@ class HIDDB(object):
 
 
     async def list_indices(self, database_id: str, collection_name: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/index"
         method = "get"
 
@@ -267,9 +256,9 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def get_index(self, database_id: str, collection_name: str, field_name: str):
-        url = f"https://{database_id}.{domain}"
-        path = f"/collection/{collection_name}/index/{field_name}"
+    async def get_index(self, database_id: str, collection_name: str, index_name: str):
+        url = f"{protocol}://{database_id}.{domain}"
+        path = f"/collection/{collection_name}/index/{index_name}"
         method = "get"
 
         async with aiohttp.ClientSession(url) as session:
@@ -281,9 +270,9 @@ class HIDDB(object):
                 return await resp.json()
     
 
-    async def delete_index(self, database_id: str, collection_name: str, field_name: str):
-        url = f"https://{database_id}.{domain}"
-        path = f"/collection/{collection_name}/index/{field_name}"
+    async def delete_index(self, database_id: str, collection_name: str, index_name: str):
+        url = f"{protocol}://{database_id}.{domain}"
+        path = f"/collection/{collection_name}/index/{index_name}"
         method = "delete"
 
         async with aiohttp.ClientSession(url) as session:
@@ -296,7 +285,7 @@ class HIDDB(object):
 
 
     async def insert_document(self, database_id: str, collection_name: str, documents: dict):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document"
         method = "post"
 
@@ -313,21 +302,21 @@ class HIDDB(object):
                 return await resp.text()
 
 
-    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str, vectors=None, ids=None, max_neighbors=10):
-        url = f"https://{database_id}.{domain}"
+    async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10):
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document/search"
         method = "post"
 
         if vectors:
             body = {
                 "vectors": vectors,
-                "field_name": field_name,
+                "field_name": index_name,
                 "max_neighbors": max_neighbors
             }
         if ids:
             body = {
                 "ids": ids,
-                "field_name": field_name,
+                "field_name": index_name,
                 "max_neighbors": max_neighbors
             }
         
@@ -341,7 +330,7 @@ class HIDDB(object):
 
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         method = "get"
 
@@ -355,7 +344,7 @@ class HIDDB(object):
     
 
     async def delete_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"https://{database_id}.{domain}"
+        url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         method = "delete"
 
@@ -391,5 +380,5 @@ class State:
 
         if self._refresh:
             self._refresh.cancel()
-
-        self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60, self.hiddb._machine_login, (self._key, self._secret)))
+        if 'exp' in self._decoded:
+            self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60, self.hiddb._machine_login, (self._key, self._secret)))
