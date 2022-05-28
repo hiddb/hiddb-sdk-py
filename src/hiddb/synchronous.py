@@ -3,7 +3,7 @@ import hiddb.asynchronous
 
 
 def sync(async_func):
-    return asyncio.run(async_func)
+    return asyncio.get_event_loop().run_until_complete(async_func)
 
 class HIDDB:
     def __init__(self, key: str, secret: str):
