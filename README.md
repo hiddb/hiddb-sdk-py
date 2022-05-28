@@ -4,7 +4,7 @@ The official SDK for the [HIDDB](https://hiddb.com) vector database.
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the sdk.
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the SDK.
 
 ```bash
 pip install hiddb
@@ -62,7 +62,7 @@ similar_words = hiddb.search_nearest_documents(
 )
 ```
 
-More examples are coming 🚀
+More examples and a more detailed documentation will follow soon 🚀
 
 ## Contributing
 
