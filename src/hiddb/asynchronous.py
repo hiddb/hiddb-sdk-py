@@ -9,7 +9,7 @@ async def set_timeout(seconds, callback, args=None):
     await callback(*args) if args else await callback()
 
 secure = False
-domain = 'localhost'
+domain = 'localhost:4010'
 
 protocol = 'https' if secure else 'http'
 baseDbUrl = f'{protocol}://api.{domain}'
