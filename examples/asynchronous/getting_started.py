@@ -14,7 +14,7 @@ async def main():
     await hiddb.create_index(
         database_id=database_id,
         collection_name='wordvectors',
-        field_name="word-vector",
+        index_name="word-vector",
         dimension=300
     )
 
@@ -32,7 +32,7 @@ async def main():
     await hiddb.search_nearest_documents(
         database_id=database_id,
         collection_name='wordvectors',
-        field_name="word-vector",
+        index_name="word-vector",
         vectors=[[43.0]*300]
     )
 
