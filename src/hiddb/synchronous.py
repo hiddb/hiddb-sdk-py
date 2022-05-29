@@ -58,11 +58,11 @@ class HIDDB:
     def delete_index(self, database_id: str, collection_name: str, index_name: str):
         return sync(self.hiddb.delete_index(database_id, collection_name, index_name))
 
-    def insert_document(self, database_id: str, collection_name: str, documents: list):
-        return sync(self.hiddb.insert_document(database_id, collection_name, documents))
+    def insert_document(self, database_id: str, collection_name: str, documents: list, request_compression=True):
+        return sync(self.hiddb.insert_document(database_id, collection_name, documents, request_compression=request_compression))
 
-    def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10):
-        return sync(self.hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors, ids=ids, max_neighbors=max_neighbors))
+    def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10, request_compression=True):
+        return sync(self.hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors, ids=ids, max_neighbors=max_neighbors, request_compression=request_compression))
 
     def get_document(self, database_id: str, collection_name: str, document_id: str):
         return sync(self.hiddb.get_document(database_id, collection_name, document_id))

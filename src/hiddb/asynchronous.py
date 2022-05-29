@@ -4,17 +4,18 @@ import aiohttp
 import time
 import jwt
 
+import json
+import zlib
 
 async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = True
-domain = 'hiddb.io'
+secure = False
+domain = 'localhost:4010'
 
 protocol = 'https' if secure else 'http'
-baseDbUrl = f'{protocol}://api.{domain}'
-postHeaders = {'Content-Type': 'application/json'}
+baseDbUrl = f'{protocol}://{domain}'
 
 
 @dataclass
@@ -70,10 +71,11 @@ class HIDDB:
         await self.make_request(request_data)
 
     async def create_instance(self, database_id: str, type: str, volume_size: str):
-        body = {"database_id": database_id,
-                "type": type,
-                "volume_size": volume_size
-                }
+        body = {
+            "database_id": database_id,
+            "type": type,
+            "volume_size": volume_size
+        }
         request_data = StdRequest(path=f"/instance", method="post", body=body)
         await self.make_request(request_data)
 
@@ -91,7 +93,9 @@ class HIDDB:
 
     async def create_collection(self, database_id: str, collection_name: str):
         url = f"{protocol}://{database_id}.{domain}"
-        body = {"collection_name": collection_name}
+        body = {
+            "collection_name": collection_name
+        }
         request_data = BaseRequest(url=url, path=f"/collection", method="post", body=body)
         await self.make_request(request_data)
 
@@ -138,15 +142,17 @@ class HIDDB:
         request_data = BaseRequest(url=url, path=path, method="delete")
         await self.make_request(request_data)
 
-    async def insert_document(self, database_id: str, collection_name: str, documents: dict):
+    async def insert_document(self, database_id: str, collection_name: str, documents: list, request_compression=True):
         url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document"
-        body = {"documents": documents}
+        body = {
+            "documents": documents
+        }
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
-        await self.make_request(request_data)
+        await self.make_request(request_data, request_compression=request_compression)
 
     async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str,
-                                       vectors=None, ids=None, max_neighbors=10):
+                                       vectors=None, ids=None, max_neighbors=10, request_compression=True):
         url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document/search"
         body = {
@@ -155,13 +161,13 @@ class HIDDB:
         }
         if vectors:
             body["vectors"] = vectors
-        elif ids:  # elif or if?
+        elif ids:
             body["ids"] = ids
-        else:
-            # what here ?
-            pass
+        elif (vectors and ids) or not (vectors and ids):
+            raise Exception("Provide either 'vectors' or 'ids'.")
+
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
-        await self.make_request(request_data)
+        await self.make_request(request_data, request_compression=request_compression)
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
         url = f"{protocol}://{database_id}.{domain}"
@@ -175,16 +181,30 @@ class HIDDB:
         request_data = BaseRequest(url=url, path=path, method="delete")
         await self.make_request(request_data)
 
-    async def make_request(self, request_data: BaseRequest):
+    async def make_request(self, request_data: BaseRequest, request_compression=False):
         async with aiohttp.ClientSession(request_data.url) as session:
             req = getattr(session, request_data.method)
             session.headers.update({'Authorization': f'Bearer {self.state.access_token}'})
-            post_headers_aux = postHeaders if request_data.body else postHeaders
-            async with req(request_data.path, json=request_data.body, headers=post_headers_aux) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
 
+            if request_compression:
+                data = zlib.compress(json.dumps(request_data.body).encode('utf-8'))
+                post_headers = {'Content-Encoding': 'deflate'} if request_data.body else None
+                async with req(request_data.path, data=data, headers=post_headers) as resp:
+                    if resp.status != 200 and resp.status != 202:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    try:
+                        return await resp.json()
+                    except:
+                        return await resp.text()
+            else: 
+                post_headers = {'Content-Type': 'application/json'} if request_data.body else None
+                async with req(request_data.path, json=request_data.body, headers=post_headers) as resp:
+                    if resp.status != 200 and resp.status != 202:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    try:
+                        return await resp.json()
+                    except:
+                        return await resp.text()
 
 class State:
     def __init__(self, hiddb: HIDDB, key: str, secret: str):
