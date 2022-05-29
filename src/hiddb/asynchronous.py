@@ -11,11 +11,11 @@ async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = False
-domain = 'localhost:4010'
+secure = True
+domain = 'hiddb.io'
 
 protocol = 'https' if secure else 'http'
-baseDbUrl = f'{protocol}://{domain}'
+baseDbUrl = f'{protocol}://api.{domain}'
 
 
 @dataclass
