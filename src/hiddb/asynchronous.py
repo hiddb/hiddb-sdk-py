@@ -4,12 +4,15 @@ import time
 import asyncio
 import aiohttp
 
+import json
+import zlib
+
 async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = True
 domain = 'hiddb.io'
+secure = True
 
 protocol = 'https' if secure else 'http'
 baseDbUrl = f'{protocol}://api.{domain}'
@@ -284,7 +287,7 @@ class HIDDB(object):
                 return await resp.json()
 
 
-    async def insert_document(self, database_id: str, collection_name: str, documents: dict):
+    async def insert_document(self, database_id: str, collection_name: str, documents: dict, request_compression=True):
         url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document"
         method = "post"
@@ -293,16 +296,26 @@ class HIDDB(object):
             "documents": documents,
         }
 
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.text()
+        if request_compression:
+            async with aiohttp.ClientSession(url) as session:
+                req = getattr(session, method)
+                session.headers.update({'Authorization' : f'Bearer {self.state.access_token}', 'Content-Encoding': 'deflate'})
+                data = zlib.compress(json.dumps(body).encode('utf-8'))
+                async with req(path, data=data) as resp:
+                    if resp.status != 200:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    return await resp.text()
+        else:
+            async with aiohttp.ClientSession(url) as session:
+                req = getattr(session, method)
+                session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+                async with req(path, json=body, headers=postHeaders) as resp:
+                    if resp.status != 200:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    return await resp.text()
 
 
-    async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10):
+    async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10, request_compression=True):
         url = f"{protocol}://{database_id}.{domain}"
         path = f"/collection/{collection_name}/document/search"
         method = "post"
@@ -319,14 +332,25 @@ class HIDDB(object):
                 "field_name": index_name,
                 "max_neighbors": max_neighbors
             }
-        
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+
+        if request_compression: 
+            async with aiohttp.ClientSession(url) as session:
+                req = getattr(session, method)
+                session.headers.update({'Authorization' : f'Bearer {self.state.access_token}', 'Content-Encoding': 'deflate'})
+                data = zlib.compress(json.dumps(body).encode('utf-8'))
+                async with req(path, data=data) as resp:
+                    if resp.status != 200:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    return await resp.json()
+        else:
+            async with aiohttp.ClientSession(url) as session:
+                req = getattr(session, method)
+                session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
+                async with req(path, json=body, headers=postHeaders) as resp:
+                    if resp.status != 200:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    return await resp.json()
+
 
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
