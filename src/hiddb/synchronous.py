@@ -6,6 +6,7 @@ def sync(async_func):
     return asyncio.run(async_func)
 
 class HIDDB:
+
     def __init__(self, key: str, secret: str):
         self.hiddb = sync(hiddb.asynchronous.HIDDB.create(key, secret))
 
