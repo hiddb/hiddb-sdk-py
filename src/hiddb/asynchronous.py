@@ -61,17 +61,17 @@ class HIDDB:
         request_data = StdRequest(path=f"/database", method="get")
         await self.make_request(request_data)
 
-    async def get_database(self, _id: str):
-        request_data = StdRequest(path=f"/database/{_id}", method="get")
+    async def get_database(self, id: str):
+        request_data = StdRequest(path=f"/database/{id}", method="get")
         await self.make_request(request_data)
 
-    async def delete_database(self, _id: str):
-        request_data = StdRequest(path=f"/database/{_id}", method="delete")
+    async def delete_database(self, id: str):
+        request_data = StdRequest(path=f"/database/{id}", method="delete")
         await self.make_request(request_data)
 
-    async def create_instance(self, database_id: str, _type: str, volume_size: str):
+    async def create_instance(self, database_id: str, type: str, volume_size: str):
         body = {"database_id": database_id,
-                "type": _type,
+                "type": type,
                 "volume_size": volume_size
                 }
         request_data = StdRequest(path=f"/instance", method="post", body=body)
@@ -81,12 +81,12 @@ class HIDDB:
         request_data = StdRequest(path=f"/instance", method="get")
         await self.make_request(request_data)
 
-    async def get_instance(self, _id: str):
-        request_data = StdRequest(path=f"/instance/{_id}", method="get")
+    async def get_instance(self, id: str):
+        request_data = StdRequest(path=f"/instance/{id}", method="get")
         await self.make_request(request_data)
 
-    async def delete_instance(self, _id: str):
-        request_data = StdRequest(path=f"/instance/{_id}", method="delete")
+    async def delete_instance(self, id: str):
+        request_data = StdRequest(path=f"/instance/{id}", method="delete")
         await self.make_request(request_data)
 
     async def create_collection(self, database_id: str, collection_name: str):
