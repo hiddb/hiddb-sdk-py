@@ -10,18 +10,30 @@ import zlib
 from requests import Session
 from urllib.parse import urljoin
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+environment = os.getenv('HIDDB_SDK_PY_ENV')
+domain = os.getenv('HIDDB_SDK_PY_DOMAIN')
+
+if environment not in ['local', 'dev', 'prod']:
+    raise ValueError(f"HIDDB_SDK_PY_ENV")
+    
+if not os.getenv('HIDDB_SDK_PY_DOMAIN'):
+    raise ValueError(f"HIDDB_SDK_PY_DOMAIN")
+
+secure = environment != 'local'
+protocol = 'https' if secure else 'http'
+subdomain = '' if environment == 'local' else 'api.'
+baseDbUrl = f'{protocol}://{subdomain}{domain}'
+
 
 async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = False
-# domain = 'hiddb.io'
-domain = 'localhost:4010'
-
-protocol = 'https' if secure else 'http'
-baseDbUrl = f'{protocol}://{domain}'
-# baseDbUrl = f'http://localhost:4010'
 
 class APIClient(Session):
     def __init__(self, prefix_url=None, *args, **kwargs):
