@@ -10,24 +10,7 @@ import zlib
 from requests import Session
 from urllib.parse import urljoin
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-environment = os.getenv('HIDDB_SDK_PY_ENV')
-domain = os.getenv('HIDDB_SDK_PY_DOMAIN')
-
-if environment not in ['local', 'dev', 'prod']:
-    raise ValueError(f"HIDDB_SDK_PY_ENV")
-    
-if not os.getenv('HIDDB_SDK_PY_DOMAIN'):
-    raise ValueError(f"HIDDB_SDK_PY_DOMAIN")
-
-secure = environment != 'local'
-protocol = 'https' if secure else 'http'
-subdomain = '' if environment == 'local' else 'api.'
-baseDbUrl = f'{protocol}://{subdomain}{domain}'
+import config
 
 
 async def set_timeout(seconds, callback, args=None):
@@ -54,7 +37,7 @@ class BaseRequest:
 
 @dataclass
 class StdRequest(BaseRequest):
-    url: str = baseDbUrl
+    url: str = config.baseDbUrl
     body: dict = None
 
 
@@ -113,7 +96,7 @@ class HIDDB:
         self.make_request(request_data)
 
     def create_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         body = {
             "collection_name": collection_name
         }
@@ -121,22 +104,22 @@ class HIDDB:
         self.make_request(request_data)
 
     def list_collections(self, database_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         request_data = BaseRequest(url=url, path=f"/collection", method="get")
         self.make_request(request_data)
 
     def get_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="get")
         self.make_request(request_data)
 
     def delete_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="delete")
         self.make_request(request_data)
 
     def create_index(self, database_id: str, collection_name: str, index_name: str, dimension: int):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/index"
         body = {
             "field_name": index_name,
@@ -146,25 +129,25 @@ class HIDDB:
         self.make_request(request_data)
 
     def list_indices(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/index"
         request_data = BaseRequest(url=url, path=path, method="get")
         self.make_request(request_data)
 
     def get_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/index/{index_name}"
         request_data = BaseRequest(url=url, path=path, method="get")
         self.make_request(request_data)
 
     def delete_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/index/{index_name}"
         request_data = BaseRequest(url=url, path=path, method="delete")
         self.make_request(request_data)
 
     def insert_document(self, database_id: str, collection_name: str, documents: list, request_compression=True):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/document"
         body = {
             "documents": documents
@@ -174,7 +157,7 @@ class HIDDB:
 
     def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str,
                                        vectors=None, ids=None, max_neighbors=10, request_compression=True):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/document/search"
         body = {
             "field_name": index_name,
@@ -191,13 +174,13 @@ class HIDDB:
         self.make_request(request_data, request_compression=request_compression)
 
     def get_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         request_data = BaseRequest(url=url, path=path, method="get")
         self.make_request(request_data)
 
     def delete_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         request_data = BaseRequest(url=url, path=path, method="delete")
         self.make_request(request_data)
