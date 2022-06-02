@@ -11,11 +11,19 @@ async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = True
-domain = 'hiddb.io'
+# secure = True
+# domain = 'hiddb.io'
+
+# protocol = 'https' if secure else 'http'
+# baseDbUrl = f'{protocol}://api.{domain}'
+
+secure = False
+# domain = 'hiddb.io'
+domain = 'localhost:4010'
 
 protocol = 'https' if secure else 'http'
-baseDbUrl = f'{protocol}://api.{domain}'
+baseDbUrl = f'{protocol}://{domain}'
+# baseDbUrl = f'http://localhost:4010'
 
 
 @dataclass
@@ -188,7 +196,7 @@ class HIDDB:
 
             if request_compression:
                 data = zlib.compress(json.dumps(request_data.body).encode('utf-8'))
-                post_headers = {'Content-Encoding': 'deflate'} if request_data.body else None
+                post_headers = {'Content-Type': 'application/octet-stream', 'Content-Encoding': 'deflate'} if request_data.body else None
                 async with req(request_data.path, data=data, headers=post_headers) as resp:
                     if resp.status != 200 and resp.status != 202:
                         raise Exception(f"Status code {resp.status}: {await resp.text()}")

@@ -1,7 +1,6 @@
 from hiddb.synchronous import HIDDB
 
-
-def test_sdk():
+def test_synchronous():
     hiddb = HIDDB('XXXXXXXXXXXXXXXXXXXX', 'XXXXXXXXXXXXXXXXXXXX')
 
     database_id = "ojzlyjbxwqgscqluue"
@@ -30,8 +29,13 @@ def test_sdk():
     hiddb.get_index(database_id, collection_name, index_name)
     hiddb.delete_index(database_id, collection_name, index_name)
 
-    hiddb.insert_document(database_id, collection_name, [{"id": document_id, index_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}])
-    hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
-    hiddb.search_nearest_documents(database_id, collection_name, index_name, ids=[document_id])
+    hiddb.insert_document(database_id, collection_name, [{"id": document_id, index_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=False)
+    hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=False)
+    hiddb.search_nearest_documents(database_id, collection_name, index_name, ids=[document_id], request_compression=False)
+
+    hiddb.insert_document(database_id, collection_name, [{"id": document_id, index_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=True)
+    hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=True)
+    hiddb.search_nearest_documents(database_id, collection_name, index_name, ids=[document_id], request_compression=True)
+
     hiddb.get_document(database_id, collection_name, document_id)
     hiddb.delete_document(database_id, collection_name, document_id)
