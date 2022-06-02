@@ -10,7 +10,7 @@ import zlib
 from requests import Session
 from urllib.parse import urljoin
 
-import config
+from hiddb import config
 
 
 async def set_timeout(seconds, callback, args=None):

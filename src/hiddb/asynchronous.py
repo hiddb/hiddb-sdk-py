@@ -7,7 +7,7 @@ import jwt
 import json
 import zlib
 
-import config
+from hiddb import config
 
 
 async def set_timeout(seconds, callback, args=None):

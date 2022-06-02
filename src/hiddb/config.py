@@ -1,15 +1,10 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-environment = os.getenv('HIDDB_SDK_PY_ENV')
-domain = os.getenv('HIDDB_SDK_PY_DOMAIN')
+environment = 'dev'
+domain = 'hiddb.dev'
 
 if environment not in ['local', 'dev', 'prod']:
     raise ValueError(f"HIDDB_SDK_PY_ENV")
     
-if not os.getenv('HIDDB_SDK_PY_DOMAIN'):
+if not domain:
     raise ValueError(f"HIDDB_SDK_PY_DOMAIN")
 
 secure = environment != 'local'
