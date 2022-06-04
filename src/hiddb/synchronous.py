@@ -37,7 +37,7 @@ class BaseRequest:
 
 @dataclass
 class StdRequest(BaseRequest):
-    url: str = config.baseDbUrl
+    url: str = config.base_api_url
     body: dict = None
 
 
@@ -53,26 +53,27 @@ class HIDDB:
             "secret_key": secret
         }
         request_data = StdRequest(path=f"/machine/login", method="post", body=body)
-        self.make_request(request_data)
+        response = self.make_request(request_data)
+        self.state.access_token = response['access_token']
 
     def create_database(self, name: str):
         body = {
             "database_name": name,
         }
         request_data = StdRequest(path=f"/database", method="post", body=body)
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def list_databases(self):
         request_data = StdRequest(path=f"/database", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def get_database(self, id: str):
         request_data = StdRequest(path=f"/database/{id}", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def delete_database(self, id: str):
         request_data = StdRequest(path=f"/database/{id}", method="delete")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def create_instance(self, database_id: str, type: str, volume_size: str):
         body = {
@@ -81,83 +82,83 @@ class HIDDB:
             "volume_size": volume_size
         }
         request_data = StdRequest(path=f"/instance", method="post", body=body)
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def get_instances(self):
         request_data = StdRequest(path=f"/instance", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def get_instance(self, id: str):
         request_data = StdRequest(path=f"/instance/{id}", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def delete_instance(self, id: str):
         request_data = StdRequest(path=f"/instance/{id}", method="delete")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def create_collection(self, database_id: str, collection_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         body = {
             "collection_name": collection_name
         }
         request_data = BaseRequest(url=url, path=f"/collection", method="post", body=body)
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def list_collections(self, database_id: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         request_data = BaseRequest(url=url, path=f"/collection", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def get_collection(self, database_id: str, collection_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def delete_collection(self, database_id: str, collection_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="delete")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def create_index(self, database_id: str, collection_name: str, index_name: str, dimension: int):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
         body = {
             "field_name": index_name,
             "dimension": dimension,
         }
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def list_indices(self, database_id: str, collection_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
         request_data = BaseRequest(url=url, path=path, method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def get_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index/{index_name}"
         request_data = BaseRequest(url=url, path=path, method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def delete_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index/{index_name}"
         request_data = BaseRequest(url=url, path=path, method="delete")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def insert_document(self, database_id: str, collection_name: str, documents: list, request_compression=True):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document"
         body = {
             "documents": documents
         }
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
-        self.make_request(request_data, request_compression=request_compression)
+        return self.make_request(request_data, request_compression=request_compression)
 
     def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str,
                                        vectors=None, ids=None, max_neighbors=10, request_compression=True):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/search"
         body = {
             "field_name": index_name,
@@ -171,21 +172,23 @@ class HIDDB:
             raise Exception("Provide either 'vectors' or 'ids'.")
 
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
-        self.make_request(request_data, request_compression=request_compression)
+        return self.make_request(request_data, request_compression=request_compression)
 
     def get_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         request_data = BaseRequest(url=url, path=path, method="get")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def delete_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{config.protocol}://{database_id}.{config.domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
         request_data = BaseRequest(url=url, path=path, method="delete")
-        self.make_request(request_data)
+        return self.make_request(request_data)
 
     def make_request(self, request_data: BaseRequest, request_compression=False):
+        if request_data.path != '/machine/login' and self.state._decoded and (self.state._decoded['exp'] - time.time() < 60):
+            self._machine_login(self.state._key, self.state._secret)
         if request_compression:
             # data = zlib.compress(json.dumps(request_data.body).encode('utf-8'))
             with APIClient(request_data.url) as client:
@@ -224,15 +227,5 @@ class State:
     
     @access_token.setter
     def access_token(self, access_token):
-        if not access_token:
-            self._access_token = access_token
-            return
-        self._decoded = jwt.decode(access_token, options={"verify_signature": False})
-
         self._access_token = access_token
-
-        if self._refresh:
-            self._refresh.cancel()
-        if 'exp' in self._decoded:
-            self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60,
-                                                              self.hiddb._machine_login, (self._key, self._secret)))
+        self._decoded = jwt.decode(access_token, options={"verify_signature": False})
