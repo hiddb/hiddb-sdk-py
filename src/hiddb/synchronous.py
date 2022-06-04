@@ -187,7 +187,7 @@ class HIDDB:
         return self.make_request(request_data)
 
     def make_request(self, request_data: BaseRequest, request_compression=False):
-        if request_data.path != '/machine/login' and self.state._decoded and (self.state._decoded['exp'] - time.time() < 60):
+        if request_data.path != '/machine/login' and self.state._decoded and 'exp' in self.state._decoded and (self.state._decoded['exp'] - time.time() < 60):
             self._machine_login(self.state._key, self.state._secret)
         if request_compression:
             # data = zlib.compress(json.dumps(request_data.body).encode('utf-8'))
