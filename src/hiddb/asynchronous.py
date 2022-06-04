@@ -114,7 +114,7 @@ class HIDDB:
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
         body = {
-            "field_name": index_name,
+            "index_name": index_name,
             "dimension": dimension,
         }
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
@@ -152,7 +152,7 @@ class HIDDB:
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/search"
         body = {
-            "field_name": index_name,
+            "index_name": index_name,
             "max_neighbors": max_neighbors
         }
         if vectors:
