@@ -13,7 +13,7 @@ hiddb.create_collection(database_id=database_id, collection_name="wordvectors")
 hiddb.create_index(
     database_id=database_id,
     collection_name='wordvectors',
-    index_name="word-vector",
+    field_name="word-vector",
     dimension=300
 )
 
@@ -31,7 +31,7 @@ hiddb.insert_document(
 hiddb.search_nearest_documents(
     database_id=database_id,
     collection_name='wordvectors',
-    index_name="word-vector",
+    field_name="word-vector",
     vectors=[[43.0]*300]
 )
 

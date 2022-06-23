@@ -30,7 +30,7 @@ Create an index within this collection:
 hiddb.create_index(
     database_id="<your database_id>",
     collection_name='wordvectors',
-    index_name="vector",
+    field_name="vector",
     dimension=300
 )
 ```
@@ -56,7 +56,7 @@ Search for nearest documents:
 similar_words = hiddb.search_nearest_documents(
     database_id="<your database_id>",
     collection_name='wordvectors',
-    index_name="vector",
+    field_name="vector",
     vectors=[[42.0]*300],
     max_neighbors=10
 )

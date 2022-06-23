@@ -8,7 +8,7 @@ async def test_asynchronous():
     database_id = "ojzlyjbxwqgscqluue"
     instance_id = "brslsjpvwrgucrlrxi"
     collection_name = "collection_name"
-    index_name = "index_name"
+    field_name = "field_name"
     document_id = "document_id"
 
     await hiddb.create_database(database_id)
@@ -26,18 +26,18 @@ async def test_asynchronous():
     await hiddb.get_collection(database_id, collection_name)
     await hiddb.delete_collection(database_id, collection_name)
 
-    await hiddb.create_index(database_id, collection_name, index_name, 10)
+    await hiddb.create_index(database_id, collection_name, field_name, 10)
     await hiddb.list_indices(database_id, collection_name)
-    await hiddb.get_index(database_id, collection_name, index_name)
-    await hiddb.delete_index(database_id, collection_name, index_name)
+    await hiddb.get_index(database_id, collection_name, field_name)
+    await hiddb.delete_index(database_id, collection_name, field_name)
 
-    await hiddb.insert_document(database_id, collection_name, [{"id": document_id, index_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=False)
-    await hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=False)
-    await hiddb.search_nearest_documents(database_id, collection_name, index_name, ids=[document_id], request_compression=False)
+    await hiddb.insert_document(database_id, collection_name, [{"id": document_id, field_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=False)
+    await hiddb.search_nearest_documents(database_id, collection_name, field_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=False)
+    await hiddb.search_nearest_documents(database_id, collection_name, field_name, ids=[document_id], request_compression=False)
 
-    await hiddb.insert_document(database_id, collection_name, [{"id": document_id, index_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=True)
-    await hiddb.search_nearest_documents(database_id, collection_name, index_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=True)
-    await hiddb.search_nearest_documents(database_id, collection_name, index_name, ids=[document_id], request_compression=True)
+    await hiddb.insert_document(database_id, collection_name, [{"id": document_id, field_name: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}], request_compression=True)
+    await hiddb.search_nearest_documents(database_id, collection_name, field_name, vectors=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]], request_compression=True)
+    await hiddb.search_nearest_documents(database_id, collection_name, field_name, ids=[document_id], request_compression=True)
 
     await hiddb.get_document(database_id, collection_name, document_id)
     await hiddb.delete_document(database_id, collection_name, document_id)

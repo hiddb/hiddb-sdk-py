@@ -110,11 +110,11 @@ class HIDDB:
         request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="delete")
         await self.make_request(request_data)
 
-    async def create_index(self, database_id: str, collection_name: str, index_name: str, dimension: int):
+    async def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
         body = {
-            "index_name": index_name,
+            "field_name": field_name,
             "dimension": dimension,
         }
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
@@ -126,15 +126,15 @@ class HIDDB:
         request_data = BaseRequest(url=url, path=path, method="get")
         await self.make_request(request_data)
 
-    async def get_index(self, database_id: str, collection_name: str, index_name: str):
+    async def get_index(self, database_id: str, collection_name: str, field_name: str):
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
-        path = f"/collection/{collection_name}/index/{index_name}"
+        path = f"/collection/{collection_name}/index/{field_name}"
         request_data = BaseRequest(url=url, path=path, method="get")
         await self.make_request(request_data)
 
-    async def delete_index(self, database_id: str, collection_name: str, index_name: str):
+    async def delete_index(self, database_id: str, collection_name: str, field_name: str):
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
-        path = f"/collection/{collection_name}/index/{index_name}"
+        path = f"/collection/{collection_name}/index/{field_name}"
         request_data = BaseRequest(url=url, path=path, method="delete")
         await self.make_request(request_data)
 
@@ -147,12 +147,12 @@ class HIDDB:
         request_data = BaseRequest(url=url, path=path, method="post", body=body)
         await self.make_request(request_data, request_compression=request_compression)
 
-    async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str,
+    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str,
                                        vectors=None, ids=None, max_neighbors=10, request_compression=True):
         url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/search"
         body = {
-            "index_name": index_name,
+            "field_name": field_name,
             "max_neighbors": max_neighbors
         }
         if vectors:
