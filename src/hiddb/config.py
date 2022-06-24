@@ -1,6 +1,6 @@
-environment = 'dev'
-api_domain = 'hiddb.dev'
-db_domain = 'hiddb.dev'
+environment = 'prod'
+api_domain = 'hiddb.io'
+db_domain = 'hiddb.io'
 
 if environment not in ['local', 'dev', 'prod']:
     raise ValueError(f"HIDDB_SDK_PY_ENV")
