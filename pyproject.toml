@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hiddb"
-version = "0.1.6"
+version = "0.1.10"
 description = "Python SDK for HIDDB"
 keywords = [
     "HIDDB", 
@@ -22,14 +22,20 @@ python = "^3.7"
 PyJWT = "^2.3.0"
 asyncio = "^3.4.3"
 aiohttp = "^3.8.1"
+requests = "^2.27.1"
+urllib3 = "^1.26.9"
+pytest-asyncio = "^0.18.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
 flake8 = "^4.0.1"
 mypy = "^0.931"
 black = "^22.1.0"
 tox = "^3.24.5"
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[pytest]
+asyncio_mode="auto"

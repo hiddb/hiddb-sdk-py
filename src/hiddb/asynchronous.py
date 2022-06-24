@@ -1,22 +1,36 @@
-import jwt
-import time
-
+from dataclasses import dataclass
 import asyncio
 import aiohttp
+import time
+import jwt
+
+import json
+import zlib
+
+from hiddb import config
+
 
 async def set_timeout(seconds, callback, args=None):
     await asyncio.sleep(seconds)
     await callback(*args) if args else await callback()
 
-secure = True
-domain = 'hiddb.io'
+@dataclass
+class BaseRequest:
+    path: str
+    method: str
+    url: str
+    body: dict = None
 
-protocol = 'https' if secure else 'http'
-baseDbUrl = f'{protocol}://api.{domain}'
-postHeaders = { 'Content-Type' : 'application/json' }
+
+@dataclass
+class StdRequest(BaseRequest):
+    url: str = config.base_api_url
+    body: dict = None
 
 
-class HIDDB(object):
+class HIDDB:
+    state = None
+
     @classmethod
     async def create(cls, key, secret):
         self = HIDDB()
@@ -25,336 +39,168 @@ class HIDDB(object):
         await self._machine_login(key, secret)
         return self
 
-
     async def _machine_login(self, key: str, secret: str):
-        url = baseDbUrl
-        path = f"/machine/login"
-        method = "post"
-
         body = {
             "access_key": key,
             "secret_key": secret
         }
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                self.state.access_token = (await resp.json())['access_token']
-                return self.state.access_token
+        request_data = StdRequest(path=f"/machine/login", method="post", body=body)
+        await self.make_request(request_data)
 
     async def create_database(self, name: str):
-        url = baseDbUrl
-        path = f"/database"
-        method = "post"
-
         body = {
             "database_name": name,
         }
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 202 and resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+        request_data = StdRequest(path=f"/database", method="post", body=body)
+        await self.make_request(request_data)
 
     async def list_databases(self):
-        url = baseDbUrl
-        path = f"/database"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = StdRequest(path=f"/database", method="get")
+        await self.make_request(request_data)
 
     async def get_database(self, id: str):
-        url = baseDbUrl
-        path = f"/database/{id}"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = StdRequest(path=f"/database/{id}", method="get")
+        await self.make_request(request_data)
 
     async def delete_database(self, id: str):
-        url = baseDbUrl
-        path = f"/database/{id}"
-        method = "delete"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 202:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+        request_data = StdRequest(path=f"/database/{id}", method="delete")
+        await self.make_request(request_data)
 
     async def create_instance(self, database_id: str, type: str, volume_size: str):
-        url = baseDbUrl
-        path = f"/instance"
-        method = "post"
-
         body = {
             "database_id": database_id,
             "type": type,
-            "volume_size": volume_size,
+            "volume_size": volume_size
         }
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 202:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+        request_data = StdRequest(path=f"/instance", method="post", body=body)
+        await self.make_request(request_data)
 
     async def get_instances(self):
-        url = baseDbUrl
-        path = f"/instance"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = StdRequest(path=f"/instance", method="get")
+        await self.make_request(request_data)
 
     async def get_instance(self, id: str):
-        url = baseDbUrl
-        path = f"/instance/{id}"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = StdRequest(path=f"/instance/{id}", method="get")
+        await self.make_request(request_data)
 
     async def delete_instance(self, id: str):
-        url = baseDbUrl
-        path = f"/instance/{id}"
-        method = "delete"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 202:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-    
+        request_data = StdRequest(path=f"/instance/{id}", method="delete")
+        await self.make_request(request_data)
 
     async def create_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection"
-        method = "post"
-
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         body = {
-            "collection_name": collection_name,
+            "collection_name": collection_name
         }
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = BaseRequest(url=url, path=f"/collection", method="post", body=body)
+        await self.make_request(request_data)
 
     async def list_collections(self, database_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
+        request_data = BaseRequest(url=url, path=f"/collection", method="get")
+        await self.make_request(request_data)
 
     async def get_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection/{collection_name}"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-    
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
+        request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="get")
+        await self.make_request(request_data)
 
     async def delete_collection(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection/{collection_name}"
-        method = "delete"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
+        request_data = BaseRequest(url=url, path=f"/collection/{collection_name}", method="delete")
+        await self.make_request(request_data)
 
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
-
-    async def create_index(self, database_id: str, collection_name: str, index_name: str, dimension: int):
-        url = f"{protocol}://{database_id}.{domain}"
+    async def create_index(self, database_id: str, collection_name: str, field_name: str, dimension: int):
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
-        method = "post"
-
         body = {
-            "field_name": index_name,
+            "field_name": field_name,
             "dimension": dimension,
         }
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
+        request_data = BaseRequest(url=url, path=path, method="post", body=body)
+        await self.make_request(request_data)
 
     async def list_indices(self, database_id: str, collection_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/index"
-        method = "get"
+        request_data = BaseRequest(url=url, path=path, method="get")
+        await self.make_request(request_data)
 
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+    async def get_index(self, database_id: str, collection_name: str, field_name: str):
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
+        path = f"/collection/{collection_name}/index/{field_name}"
+        request_data = BaseRequest(url=url, path=path, method="get")
+        await self.make_request(request_data)
 
+    async def delete_index(self, database_id: str, collection_name: str, field_name: str):
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
+        path = f"/collection/{collection_name}/index/{field_name}"
+        request_data = BaseRequest(url=url, path=path, method="delete")
+        await self.make_request(request_data)
 
-    async def get_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection/{collection_name}/index/{index_name}"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-    
-
-    async def delete_index(self, database_id: str, collection_name: str, index_name: str):
-        url = f"{protocol}://{database_id}.{domain}"
-        path = f"/collection/{collection_name}/index/{index_name}"
-        method = "delete"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-
-
-    async def insert_document(self, database_id: str, collection_name: str, documents: dict):
-        url = f"{protocol}://{database_id}.{domain}"
+    async def insert_document(self, database_id: str, collection_name: str, documents: list, request_compression=True):
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document"
-        method = "post"
-
         body = {
-            "documents": documents,
+            "documents": documents
         }
+        request_data = BaseRequest(url=url, path=path, method="post", body=body)
+        await self.make_request(request_data, request_compression=request_compression)
 
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.text()
-
-
-    async def search_nearest_documents(self, database_id: str, collection_name: str, index_name: str, vectors=None, ids=None, max_neighbors=10):
-        url = f"{protocol}://{database_id}.{domain}"
+    async def search_nearest_documents(self, database_id: str, collection_name: str, field_name: str,
+                                       vectors=None, ids=None, max_neighbors=10, request_compression=True):
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/search"
-        method = "post"
-
+        body = {
+            "field_name": field_name,
+            "max_neighbors": max_neighbors
+        }
         if vectors:
-            body = {
-                "vectors": vectors,
-                "field_name": index_name,
-                "max_neighbors": max_neighbors
-            }
-        if ids:
-            body = {
-                "ids": ids,
-                "field_name": index_name,
-                "max_neighbors": max_neighbors
-            }
-        
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path, json=body, headers=postHeaders) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+            body["vectors"] = vectors
+        elif ids:
+            body["ids"] = ids
+        elif (vectors and ids) or not (vectors and ids):
+            raise Exception("Provide either 'vectors' or 'ids'.")
 
+        request_data = BaseRequest(url=url, path=path, method="post", body=body)
+        await self.make_request(request_data, request_compression=request_compression)
 
     async def get_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
-        method = "get"
-
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
-    
+        request_data = BaseRequest(url=url, path=path, method="get")
+        await self.make_request(request_data)
 
     async def delete_document(self, database_id: str, collection_name: str, document_id: str):
-        url = f"{protocol}://{database_id}.{domain}"
+        url = f"{config.protocol}://{database_id}.{config.db_domain}"
         path = f"/collection/{collection_name}/document/{document_id}"
-        method = "delete"
+        request_data = BaseRequest(url=url, path=path, method="delete")
+        await self.make_request(request_data)
 
-        async with aiohttp.ClientSession(url) as session:
-            req = getattr(session, method)
-            session.headers.update({'Authorization' : f'Bearer {self.state.access_token}'})
-            async with req(path) as resp:
-                if resp.status != 200:
-                    raise Exception(f"Status code {resp.status}: {await resp.text()}")
-                return await resp.json()
+    async def make_request(self, request_data: BaseRequest, request_compression=False):
+        async with aiohttp.ClientSession(request_data.url) as session:
+            req = getattr(session, request_data.method)
+            session.headers.update({'Authorization': f'Bearer {self.state.access_token}'})
+
+            if request_compression:
+                data = zlib.compress(json.dumps(request_data.body).encode('utf-8'))
+                post_headers = {'Content-Type': 'application/octet-stream', 'Content-Encoding': 'deflate'} if request_data.body else None
+                async with req(request_data.path, data=data, headers=post_headers) as resp:
+                    if resp.status != 200 and resp.status != 202:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    try:
+                        return await resp.json()
+                    except:
+                        return await resp.text()
+            else: 
+                post_headers = {'Content-Type': 'application/json'} if request_data.body else None
+                async with req(request_data.path, json=request_data.body, headers=post_headers) as resp:
+                    if resp.status != 200 and resp.status != 202:
+                        raise Exception(f"Status code {resp.status}: {await resp.text()}")
+                    try:
+                        return await resp.json()
+                    except:
+                        return await resp.text()
 
 class State:
     def __init__(self, hiddb: HIDDB, key: str, secret: str):
@@ -374,11 +220,12 @@ class State:
         if not access_token:
             self._access_token = access_token
             return
-        self._decoded =  jwt.decode(access_token, options={"verify_signature": False})
+        self._decoded = jwt.decode(access_token, options={"verify_signature": False})
 
         self._access_token = access_token
 
         if self._refresh:
             self._refresh.cancel()
         if 'exp' in self._decoded:
-            self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60, self.hiddb._machine_login, (self._key, self._secret)))
+            self._refresh = asyncio.ensure_future(set_timeout(self._decoded['exp'] - time.time() - 60,
+                                                              self.hiddb._machine_login, (self._key, self._secret)))
